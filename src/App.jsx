@@ -1,121 +1,37 @@
+// App.jsx import React, { useState } from 'react'; import './App.css';
 
-// App.jsx
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import "./App.css";
+import RechargeForm from './RechargeForm'; import SpinWheel from './SpinWheel';
 
-const discounts = [10, 50, 100, 200, 500];
+function App() { const [discount, setDiscount] = useState(null); const [shared, setShared] = useState(false);
 
-function getRandomDiscount() {
-  return discounts[Math.floor(Math.random() * discounts.length)];
-}
+return ( <div className="app-container"> <h1 className="header">Lucky Recharge Wheel</h1> {!discount ? ( <SpinWheel setDiscount={setDiscount} /> ) : !shared ? ( <div className="share-section"> <p>You won ₹{discount} OFF! Share with 5 friends to claim.</p> <a href={https://wa.me/?text=I%20won%20₹${discount}%20Recharge%20Discount%20on%20this%20site!%20Check%20yours%20now!} target="_blank" rel="noopener noreferrer" className="share-btn" onClick={() => setShared(true)} > Share on WhatsApp </a> </div> ) : ( <RechargeForm discount={discount} /> )} </div> ); }
 
-export default function App() {
-  const [spun, setSpun] = useState(false);
-  const [discount, setDiscount] = useState(null);
-  const [shared, setShared] = useState(false);
-  const [coupon, setCoupon] = useState(0);
-  const [form, setForm] = useState({ number: "", operator: "", plan: 0 });
-  const [paymentStarted, setPaymentStarted] = useState(false);
-  const [transactionId, setTransactionId] = useState(null);
+export default App;
 
-  const handleSpin = () => {
-    const value = getRandomDiscount();
-    setDiscount(value);
-    setSpun(true);
-  };
+// SpinWheel.jsx import React, { useState } from 'react'; import './SpinWheel.css';
 
-  const handleShare = () => {
-    setShared(true);
-    setCoupon(discount);
-  };
+const prizes = [10, 20, 50, 100, 200, 500];
 
-  const handleFormChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+function SpinWheel({ setDiscount }) { const [spinning, setSpinning] = useState(false);
 
-  const handlePayment = () => {
-    setPaymentStarted(true);
-    const upiLink = `upi://pay?pa=9598023701@ypl&pn=Mobile+Recharge&am=${form.plan - coupon}&cu=INR`;
-    window.location.href = upiLink;
-    setTimeout(() => {
-      const fakeTxnId = "TXN" + Math.floor(Math.random() * 1000000000);
-      setTransactionId(fakeTxnId);
-    }, 5000);
-  };
+const handleSpin = () => { setSpinning(true); setTimeout(() => { const result = prizes[Math.floor(Math.random() * prizes.length)]; setDiscount(result); setSpinning(false); }, 3000); };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-700 via-pink-500 to-yellow-400 text-white flex flex-col items-center justify-center p-4 space-y-6">
-      <h1 className="text-4xl font-bold drop-shadow-md">Mobile Recharge Lucky Spin</h1>
+return ( <div className="wheel-container"> <div className={wheel ${spinning ? 'spin' : ''}}></div> <button onClick={handleSpin} disabled={spinning} className="spin-btn"> {spinning ? 'Spinning...' : 'Spin the Wheel'} </button> </div> ); }
 
-      {!spun ? (
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          className="bg-white text-purple-800 px-6 py-3 rounded-2xl font-semibold shadow-lg"
-          onClick={handleSpin}
-        >
-          Spin the Wheel
-        </motion.button>
-      ) : !shared ? (
-        <div className="text-center">
-          <p className="text-2xl">Congratulations! You won ₹{discount} OFF</p>
-          <p className="text-md mt-2">Share with a friend to unlock coupon code.</p>
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            className="bg-green-500 px-4 py-2 mt-3 rounded-xl"
-            onClick={handleShare}
-          >
-            Share Now
-          </motion.button>
-        </div>
-      ) : transactionId ? (
-        <div className="bg-white text-purple-800 p-6 rounded-2xl text-center shadow-xl">
-          <h2 className="text-2xl font-bold">Recharge Done!</h2>
-          <p className="mt-2">Transaction ID: {transactionId}</p>
-          <p className="mt-1">Thank you for using our service!</p>
-        </div>
-      ) : paymentStarted ? (
-        <p className="text-xl animate-pulse">Waiting for payment confirmation...</p>
-      ) : (
-        <div className="bg-white text-purple-800 p-6 rounded-2xl w-full max-w-md space-y-4 shadow-xl">
-          <h2 className="text-2xl font-bold">Recharge Form</h2>
+export default SpinWheel;
 
-          <input
-            type="text"
-            name="number"
-            placeholder="Mobile Number"
-            className="w-full p-2 rounded-xl border"
-            onChange={handleFormChange}
-          />
-          <input
-            type="text"
-            name="operator"
-            placeholder="Operator (e.g., Jio, Airtel)"
-            className="w-full p-2 rounded-xl border"
-            onChange={handleFormChange}
-          />
-          <input
-            type="number"
-            name="plan"
-            placeholder="Recharge Amount"
-            className="w-full p-2 rounded-xl border"
-            onChange={handleFormChange}
-          />
+// RechargeForm.jsx import React, { useState } from 'react'; import './RechargeForm.css';
 
-          <div className="text-md">
-            Apply Coupon: <span className="font-bold">OFF{coupon}</span>
-            <br />Final Amount: ₹{form.plan - coupon || 0}
-          </div>
+function RechargeForm({ discount }) { const [submitted, setSubmitted] = useState(false); const [plan, setPlan] = useState('199');
 
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            className="bg-purple-600 text-white w-full p-2 rounded-xl"
-            onClick={handlePayment}
-          >
-            Pay Now
-          </motion.button>
-        </div>
-      )}
-    </div>
-  );
-}
+const handleSubmit = (e) => { e.preventDefault(); setSubmitted(true); };
+
+const finalAmount = Math.max(0, parseInt(plan) - discount);
+
+if (submitted) { return ( <div className="confirmation"> <h2>Redirecting to UPI...</h2> <a href={upi://pay?pa=9598023701@ybl&pn=Recharge&cu=INR&am=${finalAmount}} className="upi-btn" > Click here if not redirected </a> <p>Transaction ID: TXN{Math.floor(Math.random() * 90000000 + 10000000)}</p> <h3>Recharge Done Successfully!</h3> </div> ); }
+
+return ( <form onSubmit={handleSubmit} className="recharge-form"> <input type="tel" placeholder="Mobile Number" required maxLength="10" /> <select required> <option value="Jio">Jio</option> <option value="Airtel">Airtel</option> <option value="VI">VI</option> </select> <input type="number" placeholder="Recharge Plan" required value={plan} onChange={(e) => setPlan(e.target.value)} /> <input type="text" value={OFF${discount}} readOnly /> <button type="submit">Recharge Now - ₹{finalAmount}</button> </form> ); }
+
+export default RechargeForm;
+
+  
